@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lox", "Lox\Lox.csproj", "{804E21A9-F994-4478-AD26-DBCCD52A740E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateAST", "GenerateAST\GenerateAST.csproj", "{0E6F0E06-36D0-457F-A774-C2C4B85BBF84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{804E21A9-F994-4478-AD26-DBCCD52A740E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{804E21A9-F994-4478-AD26-DBCCD52A740E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{804E21A9-F994-4478-AD26-DBCCD52A740E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E6F0E06-36D0-457F-A774-C2C4B85BBF84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E6F0E06-36D0-457F-A774-C2C4B85BBF84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E6F0E06-36D0-457F-A774-C2C4B85BBF84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E6F0E06-36D0-457F-A774-C2C4B85BBF84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
