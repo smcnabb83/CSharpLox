@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lox.Stmnt;
 using tt = Lox.Token.TokenType;
 
 namespace Lox
@@ -17,17 +18,47 @@ namespace Lox
             this.Tokens = tokens;
         }
 
-        public Expr parse()
+        public List<Stmt> parse()
         {
             try
             {
-                return expression();
+                List<Stmt> statements = new List<Stmt>();
+                while (!isAtEnd())
+                {
+                    statements.Add(statement());
+                }
+                return statements;
             }
             catch(ParseException ex)
             {
                 return null;
             }
         }
+
+        private Stmt statement()
+        {
+            if (Match(tt.PRINT))
+            {
+                return printStatement();
+            }
+
+            return expressionStatement();
+        }
+
+        private Stmt printStatement()
+        {
+            Expr value = expression();
+            consume(tt.SEMICOLON, "Expect ';' after value.");
+            return new Print(value);
+        }
+        
+        private Stmt expressionStatement()
+        {
+            Expr expr = expression();
+            consume(tt.SEMICOLON, "Expect ';' after value.");
+            return new Expression(expr);
+        }
+
 
         private Expr expression()
         {

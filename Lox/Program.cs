@@ -11,6 +11,9 @@ namespace Lox
     {
 
         public static bool hasError = false;
+        public static bool hadRuntimeError = false;
+
+        private static Interpreter interpreter = new Interpreter();
 
         static void Main(string[] args)
         {
@@ -39,6 +42,11 @@ namespace Lox
             {
                 //add code for exiting application later
             }
+            if (hadRuntimeError)
+            {
+                //add separate code for exiting application later
+            }
+            Console.ReadKey();
         }
 
         private static void runPrompt()
@@ -55,11 +63,11 @@ namespace Lox
             Scanner scanner = new Scanner(source);
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
-            Expr expression = parser.parse();
+            List<Stmnt.Stmt> statements = parser.parse();
 
             if (hasError) return;
 
-            Console.WriteLine(new AstPrinter().print(expression));
+            interpreter.interpret(statements);
         }
 
         public static void error(Token token, string message)
@@ -72,6 +80,12 @@ namespace Lox
             {
                 report(token.line, $"at {token.lexeme}", message);
             }
+        }
+
+        public static void runtimeError(RuntimeError error)
+        {
+            Console.WriteLine($"{error.Message} \n [line {error.token.line}]");
+            hadRuntimeError = true;
         }
 
         public static void error(int line, string message)

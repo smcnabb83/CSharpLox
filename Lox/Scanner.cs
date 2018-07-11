@@ -150,7 +150,7 @@ namespace Lox
 
             //process closing "
             advance();
-            string value = Source.Substring(start , current - start);
+            string value = Source.Substring(start + 1 , current - start - 2);
             addToken(Token.TokenType.STRING, value);
         }
 

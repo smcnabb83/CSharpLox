@@ -16,10 +16,8 @@ namespace GenerateAST
             }
 
             String outputDir = args[0];
-            defineAst(outputDir, "Expr", new List<string>() {"Binary : Expr left, Token Operator, Expr right",
-                                                             "Grouping : Expr expression",
-                                                              "Literal : Object value",
-                                                              "Unary : Token Operator, Expr right"});
+            defineAst(outputDir, "Stmt", new List<string>() {"Expression: Expr expression",
+                                                             "Print : Expr expression"});
         }
 
         private static void defineAst(String outputDir, string baseName, List<string> types)
