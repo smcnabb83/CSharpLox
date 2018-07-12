@@ -67,8 +67,23 @@ namespace Lox
             {
                 return printStatement();
             }
+            if (Match(tt.LEFT_BRACE))
+            {
+                return new GStmt.Block(block());
+            }
 
             return expressionStatement();
+        }
+
+        private List<GStmt.Stmt> block()
+        {
+            List<GStmt.Stmt> statements = new List<GStmt.Stmt>();
+            while(!check(tt.RIGHT_BRACE) && !isAtEnd())
+            {
+                statements.Add(declaration());
+            }
+            consume(tt.RIGHT_BRACE, "Expect } after block.");
+            return statements;
         }
 
         private GStmt.Stmt printStatement()

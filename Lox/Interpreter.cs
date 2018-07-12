@@ -22,6 +22,24 @@ namespace Lox
             st.Accept(this);
         }
 
+        private void executeBlock(List<GStmt.Stmt> statements, Environment env)
+        {
+            Environment previous = this.environment;
+            try
+            {
+                this.environment = env;
+
+                foreach(var statement in statements)
+                {
+                    execute(statement);
+                }
+            }
+            finally
+            {
+                this.environment = previous;
+            }
+        }
+
         public void interpret(List<GStmt.Stmt> statements)
         {
             try
@@ -190,6 +208,12 @@ namespace Lox
             Object value = evaluate(expr.value);
             environment.assign(expr.name, value);
             return value;
+        }
+
+        public Object visit_Block_Stmt(GStmt.Block stmt)
+        {
+            executeBlock(stmt.statements, new Environment(environment));
+            return null;
         }
     }
 }

@@ -18,7 +18,8 @@ namespace GenerateAST
             String outputDir = args[0];
             defineAst($"{outputDir}\\Stmt.cs", "Stmt", new List<string>() {"Expression: Expr expression",
                                                                            "Print : Expr expression",
-                                                                           "Var: Token name, Expr initializer"});
+                                                                           "Var: Token name, Expr initializer",
+                                                                           "Block: List<Stmt> statements"});
 
             defineAst($"{outputDir}\\Expr.cs", "Expr", new List<string>(){"Binary: Expr left, Token Operator, Expr right",
                                                                           "Grouping: Expr expression",

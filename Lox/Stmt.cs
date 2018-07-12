@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lox.GExpr;
 
 namespace Lox.GStmt
 {
@@ -11,6 +12,7 @@ namespace Lox.GStmt
         T visit_Expression_Stmt(Expression stmt);
         T visit_Print_Stmt(Print stmt);
         T visit_Var_Stmt(Var stmt);
+        T visit_Block_Stmt(Block stmt);
     }
     public abstract class Stmt
     {
@@ -20,9 +22,9 @@ namespace Lox.GStmt
     public class Expression : Stmt
     {
 
-        public GExpr.Expr expression;
+        public Expr expression;
 
-        public Expression(GExpr.Expr expression)
+        public Expression(Expr expression)
         {
             this.expression = expression;
         }
@@ -35,9 +37,9 @@ namespace Lox.GStmt
     public class Print : Stmt
     {
 
-        public GExpr.Expr expression;
+        public Expr expression;
 
-        public Print(GExpr.Expr expression)
+        public Print(Expr expression)
         {
             this.expression = expression;
         }
@@ -51,9 +53,9 @@ namespace Lox.GStmt
     {
 
         public Token name;
-        public GExpr.Expr initializer;
+        public Expr initializer;
 
-        public Var(Token name, GExpr.Expr initializer)
+        public Var(Token name, Expr initializer)
         {
             this.name = name;
             this.initializer = initializer;
@@ -62,6 +64,21 @@ namespace Lox.GStmt
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Var_Stmt(this);
+        }
+    }
+    public class Block : Stmt
+    {
+
+        public List<Stmt> statements;
+
+        public Block(List<Stmt> statements)
+        {
+            this.statements = statements;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Block_Stmt(this);
         }
     }
 }
