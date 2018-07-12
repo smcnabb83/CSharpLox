@@ -6,25 +6,26 @@ using System.Threading.Tasks;
 
 namespace Lox
 {
-    class AstPrinter : Visitor<string>
+    /*
+    class AstPrinter : GExpr.Visitor<string>
     {
 
-        public string print(Expr expression)
+        public string print(GExpr.Expr expression)
         {
             return expression.Accept(this);
         }
 
-        public string visit_Binary_Expr(Binary expr)
+        public string visit_Binary_Expr(GExpr.Binary expr)
         {
             return parenthesize(expr.Operator.lexeme, expr.left, expr.right);
         }
 
-        public string visit_Grouping_Expr(Grouping expr)
+        public string visit_Grouping_Expr(GExpr.Grouping expr)
         {
             return parenthesize("group", expr.expression);
         }
 
-        public string visit_Literal_Expr(Literal expr)
+        public string visit_Literal_Expr(GExpr.Literal expr)
         {
             if (expr.value == null)
             {
@@ -33,7 +34,7 @@ namespace Lox
             return expr.value.ToString();
         }
 
-        public string visit_Unary_Expr(Unary expr)
+        public string visit_Unary_Expr(GExpr.Unary expr)
         {
             return parenthesize(expr.Operator.lexeme, expr.right);
         }
@@ -51,5 +52,5 @@ namespace Lox
 
             return builder.ToString();
         }
-    }
+    }*/
 }
