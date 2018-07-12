@@ -31,7 +31,8 @@ namespace Lox
             {"this", Token.TokenType.THIS },
             {"true", Token.TokenType.TRUE },
             {"var", Token.TokenType.VAR },
-            {"while", Token.TokenType.WHILE }
+            {"while", Token.TokenType.WHILE },
+            {"break", Token.TokenType.BREAK }
         };
 
         public Scanner(string source)

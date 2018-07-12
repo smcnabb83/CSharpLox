@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lox.GExpr;
 
+
 namespace Lox.GStmt
 {
     public interface Visitor<T>
@@ -13,6 +14,9 @@ namespace Lox.GStmt
         T visit_Print_Stmt(Print stmt);
         T visit_Var_Stmt(Var stmt);
         T visit_Block_Stmt(Block stmt);
+        T visit_If_Stmt(If stmt);
+        T visit_While_Stmt(While stmt);
+        T visit_Break_Stmt(Break stmt);
     }
     public abstract class Stmt
     {
@@ -79,6 +83,57 @@ namespace Lox.GStmt
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Block_Stmt(this);
+        }
+    }
+    public class If : Stmt
+    {
+
+        public Expr condition;
+        public Stmt thenBranch;
+        public Stmt elseBranch;
+
+        public If(Expr condition, Stmt thenBranch, Stmt elseBranch)
+        {
+            this.condition = condition;
+            this.thenBranch = thenBranch;
+            this.elseBranch = elseBranch;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_If_Stmt(this);
+        }
+    }
+    public class While : Stmt
+    {
+
+        public Expr condition;
+        public Stmt body;
+
+        public While(Expr condition, Stmt body)
+        {
+            this.condition = condition;
+            this.body = body;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_While_Stmt(this);
+        }
+    }
+    public class Break : Stmt
+    {
+
+        public Token breakToken;
+
+        public Break(Token breakToken)
+        {
+            this.breakToken = breakToken;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Break_Stmt(this);
         }
     }
 }

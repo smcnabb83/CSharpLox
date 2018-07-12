@@ -14,6 +14,7 @@ namespace Lox.GExpr
         T visit_Unary_Expr(Unary expr);
         T visit_Variable_Expr(Variable expr);
         T visit_Assign_Expr(Assign expr);
+        T visit_Logical_Expr(Logical expr);
     }
     public abstract class Expr
     {
@@ -116,6 +117,25 @@ namespace Lox.GExpr
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Assign_Expr(this);
+        }
+    }
+    public class Logical : Expr
+    {
+
+        public Expr left;
+        public Token Operator;
+        public Expr right;
+
+        public Logical(Expr left, Token Operator, Expr right)
+        {
+            this.left = left;
+            this.Operator = Operator;
+            this.right = right;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Logical_Expr(this);
         }
     }
 }

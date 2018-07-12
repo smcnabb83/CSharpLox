@@ -19,14 +19,18 @@ namespace GenerateAST
             defineAst($"{outputDir}\\Stmt.cs", "Stmt", new List<string>() {"Expression: Expr expression",
                                                                            "Print : Expr expression",
                                                                            "Var: Token name, Expr initializer",
-                                                                           "Block: List<Stmt> statements"});
+                                                                           "Block: List<Stmt> statements",
+                                                                           "If: Expr condition, Stmt thenBranch, Stmt elseBranch",
+                                                                           "While: Expr condition, Stmt body",
+                                                                           "Break: Token breakToken"});
 
             defineAst($"{outputDir}\\Expr.cs", "Expr", new List<string>(){"Binary: Expr left, Token Operator, Expr right",
                                                                           "Grouping: Expr expression",
                                                                           "Literal: Object value",
                                                                           "Unary: Token Operator, Expr right",
                                                                           "Variable: Token name",
-                                                                          "Assign: Token name, Expr value"});
+                                                                          "Assign: Token name, Expr value",
+                                                                          "Logical: Expr left, Token Operator, Expr right"});
         }
 
         private static void defineAst(String outputDir, string baseName, List<string> types)

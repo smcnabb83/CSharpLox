@@ -215,5 +215,61 @@ namespace Lox
             executeBlock(stmt.statements, new Environment(environment));
             return null;
         }
+
+        public Object visit_If_Stmt(GStmt.If stmt)
+        {
+            if (isTruthy(evaluate(stmt.condition)))
+            {
+                execute(stmt.thenBranch);
+            } 
+            else if(stmt.elseBranch != null)
+            {
+                execute(stmt.elseBranch);
+            }
+
+            return null;
+        }
+
+        public Object visit_Logical_Expr(GExpr.Logical expr)
+        {
+            Object left = evaluate(expr.left);
+
+            if(expr.Operator.type == tt.OR)
+            {
+                if (isTruthy(left))
+                {
+                    return left;
+                }
+            } else
+            {
+                if (!isTruthy(left))
+                {
+                    return left;
+                }
+            }
+
+            return evaluate(expr.right);
+        }
+
+        public Object visit_While_Stmt(GStmt.While stmt)
+        {
+            while (isTruthy(evaluate(stmt.condition)))
+            {
+                try
+                {
+                    execute(stmt.body);
+                }
+                catch(BreakException bex)
+                {
+                    break;
+                }
+            }
+            return null;
+        }
+
+        public object visit_Break_Stmt(GStmt.Break stmt)
+        {
+            throw new BreakException(stmt.breakToken, "Invalid break");
+        }
     }
 }

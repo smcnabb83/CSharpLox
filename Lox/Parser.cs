@@ -63,16 +63,100 @@ namespace Lox
 
         private GStmt.Stmt statement()
         {
+            if (Match(tt.IF))
+            {
+                return ifStatement();
+            }
             if (Match(tt.PRINT))
             {
                 return printStatement();
+            }
+            if (Match(tt.FOR))
+            {
+                return forStatement();
+            }
+            if (Match(tt.WHILE))
+            {
+                return whileStatement();
             }
             if (Match(tt.LEFT_BRACE))
             {
                 return new GStmt.Block(block());
             }
+            if (Match(tt.BREAK))
+            {
+                return breakStatement();
+            }
 
             return expressionStatement();
+        }
+
+        private GStmt.Stmt breakStatement()
+        {
+            consume(tt.SEMICOLON, "Expect semicolon after break statement");
+            return new GStmt.Break(previous());
+        }
+
+        private GStmt.Stmt forStatement()
+        {
+            consume(tt.LEFT_PAREN, "Expect '(' after 'for'.");
+
+            GStmt.Stmt initializer;
+            if (Match(tt.SEMICOLON))
+            {
+                initializer = null;
+            }
+            else if (Match(tt.VAR))
+            {
+                initializer = varDeclaration();
+            }
+            else
+            {
+                initializer = expressionStatement();
+            }
+
+            GExpr.Expr condition = null;
+            if (!check(tt.SEMICOLON))
+            {
+                condition = expression();
+            }
+            consume(tt.SEMICOLON, "Expect ';' after loop condition.");
+
+            GExpr.Expr increment = null;
+            if (!check(tt.RIGHT_PAREN))
+            {
+                increment = expression();
+            }
+            consume(tt.RIGHT_PAREN, "Expect ')' after for clauses");
+            GStmt.Stmt body = statement();
+            if (increment != null)
+            {
+                body = new GStmt.Block(new List<GStmt.Stmt>() { body, new GStmt.Expression(increment) });
+            }
+            if(condition == null)
+            {
+                condition = new GExpr.Literal(true);
+            }
+            body = new GStmt.While(condition, body);
+
+            if(initializer != null)
+            {
+                body = new GStmt.Block(new List<GStmt.Stmt>() { initializer, body });
+            }
+        
+
+            return body;
+
+        }
+
+        private GStmt.Stmt whileStatement()
+        {
+            consume(tt.LEFT_PAREN, "Expect '(' after 'while'");
+            GExpr.Expr condition = expression();
+            consume(tt.RIGHT_PAREN, "Expect ')' after condition");
+            GStmt.Stmt body = statement();
+
+            return new GStmt.While(condition, body);
         }
 
         private List<GStmt.Stmt> block()
@@ -84,6 +168,22 @@ namespace Lox
             }
             consume(tt.RIGHT_BRACE, "Expect } after block.");
             return statements;
+        }
+
+        private GStmt.Stmt ifStatement()
+        {
+            consume(tt.LEFT_PAREN, "Expect ( after 'if'");
+            GExpr.Expr condition = expression();
+            consume(tt.RIGHT_PAREN, "Expect ) after if condition.");
+
+            GStmt.Stmt thenBranch = statement();
+            GStmt.Stmt elseBranch = null;
+            if (Match(tt.ELSE))
+            {
+                elseBranch = statement();
+            }
+
+            return new GStmt.If(condition, thenBranch, elseBranch);
         }
 
         private GStmt.Stmt printStatement()
@@ -108,7 +208,7 @@ namespace Lox
 
         private GExpr.Expr assignment()
         {
-            GExpr.Expr expr = equality();
+            GExpr.Expr expr = or();
 
             if (Match(tt.EQUAL))
             {
@@ -122,6 +222,34 @@ namespace Lox
                 }
 
                 error(equals, "Invalid assignment target.");
+            }
+
+            return expr;
+        }
+
+        private GExpr.Expr or()
+        {
+            GExpr.Expr expr = and();
+
+            while (Match(tt.OR))
+            {
+                Token op = previous();
+                GExpr.Expr right = and();
+                expr = new GExpr.Logical(expr, op, right);
+            }
+
+            return expr;
+        }
+
+        private GExpr.Expr and()
+        {
+            GExpr.Expr expr = equality();
+
+            while (Match(tt.AND))
+            {
+                Token op = previous();
+                GExpr.Expr right = equality();
+                expr = new GExpr.Logical(expr, op, right);
             }
 
             return expr;
