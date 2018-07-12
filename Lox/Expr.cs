@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lox
+namespace Lox.GExpr
 {
     public interface Visitor<T>
     {
@@ -12,6 +12,8 @@ namespace Lox
         T visit_Grouping_Expr(Grouping expr);
         T visit_Literal_Expr(Literal expr);
         T visit_Unary_Expr(Unary expr);
+        T visit_Variable_Expr(Variable expr);
+        T visit_Assign_Expr(Assign expr);
     }
     public abstract class Expr
     {
@@ -82,6 +84,38 @@ namespace Lox
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Unary_Expr(this);
+        }
+    }
+    public class Variable : Expr
+    {
+
+        public Token name;
+
+        public Variable(Token name)
+        {
+            this.name = name;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Variable_Expr(this);
+        }
+    }
+    public class Assign : Expr
+    {
+
+        public Token name;
+        public Expr value;
+
+        public Assign(Token name, Expr value)
+        {
+            this.name = name;
+            this.value = value;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Assign_Expr(this);
         }
     }
 }

@@ -16,8 +16,16 @@ namespace GenerateAST
             }
 
             String outputDir = args[0];
-            defineAst(outputDir, "Stmt", new List<string>() {"Expression: Expr expression",
-                                                             "Print : Expr expression"});
+            defineAst($"{outputDir}\\Stmt.cs", "Stmt", new List<string>() {"Expression: Expr expression",
+                                                                           "Print : Expr expression",
+                                                                           "Var: Token name, Expr initializer"});
+
+            defineAst($"{outputDir}\\Expr.cs", "Expr", new List<string>(){"Binary: Expr left, Token Operator, Expr right",
+                                                                          "Grouping: Expr expression",
+                                                                          "Literal: Object value",
+                                                                          "Unary: Token Operator, Expr right",
+                                                                          "Variable: Token name",
+                                                                          "Assign: Token name, Expr value"});
         }
 
         private static void defineAst(String outputDir, string baseName, List<string> types)
@@ -30,7 +38,7 @@ namespace GenerateAST
                 file.WriteLine("using System.Text;");
                 file.WriteLine("using System.Threading.Tasks;");
                 file.WriteLine(" ");
-                file.WriteLine("namespace Lox");
+                file.WriteLine($"namespace Lox.G{baseName}");
                 file.WriteLine("{");
 
                 defineVisitor(file, baseName, types);

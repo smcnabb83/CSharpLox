@@ -63,7 +63,7 @@ namespace Lox
             Scanner scanner = new Scanner(source);
             List<Token> tokens = scanner.scanTokens();
             Parser parser = new Parser(tokens);
-            List<Stmnt.Stmt> statements = parser.parse();
+            List<GStmt.Stmt> statements = parser.parse();
 
             if (hasError) return;
 

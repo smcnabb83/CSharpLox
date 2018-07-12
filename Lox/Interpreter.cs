@@ -3,24 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Lox.Stmnt;
+using Lox;
 using tt = Lox.Token.TokenType;
 
 namespace Lox
 {
-    class Interpreter : Visitor<Object>, Stmnt.Visitor<Object>
+    class Interpreter : GExpr.Visitor<Object>, GStmt.Visitor<Object>
     {
-        private Object evaluate(Expr Expression)
+        private Environment environment = new Environment();
+
+        private Object evaluate(GExpr.Expr Expression)
         {
             return Expression.Accept(this);
         }
 
-        private void execute(Stmt st)
+        private void execute(GStmt.Stmt st)
         {
             st.Accept(this);
         }
 
-        public void interpret(List<Stmt> statements)
+        public void interpret(List<GStmt.Stmt> statements)
         {
             try
             {
@@ -35,7 +37,7 @@ namespace Lox
             }
         }
 
-        public object visit_Binary_Expr(Binary expr)
+        public object visit_Binary_Expr(GExpr.Binary expr)
         {
             Object left = evaluate(expr.left);
             Object right = evaluate(expr.right);
@@ -105,17 +107,17 @@ namespace Lox
             return a.Equals(b);
         }
 
-        public object visit_Grouping_Expr(Grouping expr)
+        public object visit_Grouping_Expr(GExpr.Grouping expr)
         {
             return evaluate(expr.expression);
         }
 
-        public object visit_Literal_Expr(Literal expr)
+        public object visit_Literal_Expr(GExpr.Literal expr)
         {
             return expr.value;
         }
 
-        public object visit_Unary_Expr(Unary expr)
+        public object visit_Unary_Expr(GExpr.Unary expr)
         {
             Object right = evaluate(expr.right);
 
@@ -153,17 +155,41 @@ namespace Lox
             return true;
         }
 
-        public Object visit_Expression_Stmt(Expression stmt)
+        public Object visit_Expression_Stmt(GStmt.Expression stmt)
         {
             evaluate(stmt.expression);
             return null;
         }
 
-        public Object visit_Print_Stmt(Print stmt)
+        public Object visit_Print_Stmt(GStmt.Print stmt)
         {
             Object value = evaluate(stmt.expression);
             Console.WriteLine(value.ToString());
             return null;
+        }
+
+        public Object visit_Variable_Expr(GExpr.Variable expr)
+        {
+            return environment.get(expr.name);
+        }
+
+        public Object visit_Var_Stmt(GStmt.Var stmt)
+        {
+            Object value = null;
+            if(stmt.initializer != null)
+            {
+                value = evaluate(stmt.initializer);
+            }
+
+            environment.define(stmt.name.lexeme, value);
+            return null;
+        }
+
+        public Object visit_Assign_Expr(GExpr.Assign expr)
+        {
+            Object value = evaluate(expr.value);
+            environment.assign(expr.name, value);
+            return value;
         }
     }
 }

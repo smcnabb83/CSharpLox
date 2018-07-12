@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Lox.Stmnt;
+using Lox;
 using tt = Lox.Token.TokenType;
 
 namespace Lox
@@ -18,24 +18,50 @@ namespace Lox
             this.Tokens = tokens;
         }
 
-        public List<Stmt> parse()
+        public List<GStmt.Stmt> parse()
+        {
+
+            List<GStmt.Stmt> statements = new List<GStmt.Stmt>();
+            while (!isAtEnd())
+            {
+                statements.Add(declaration());
+            }
+            return statements;
+
+        }
+
+        private GStmt.Stmt declaration()
         {
             try
             {
-                List<Stmt> statements = new List<Stmt>();
-                while (!isAtEnd())
+                if (Match(tt.VAR))
                 {
-                    statements.Add(statement());
+                    return varDeclaration();
                 }
-                return statements;
+                return statement();
             }
-            catch(ParseException ex)
+            catch(ParseException error)
             {
+                synchronize();
                 return null;
             }
         }
 
-        private Stmt statement()
+        private GStmt.Stmt varDeclaration()
+        {
+            Token name = consume(tt.IDENTIFIER, "Expect variable name");
+
+            GExpr.Expr initializer = null;
+            if (Match(tt.EQUAL))
+            {
+                initializer = expression();
+            }
+
+            consume(tt.SEMICOLON, "Expect ';' after variable declaration");
+            return new GStmt.Var(name, initializer);
+        }
+
+        private GStmt.Stmt statement()
         {
             if (Match(tt.PRINT))
             {
@@ -45,120 +71,145 @@ namespace Lox
             return expressionStatement();
         }
 
-        private Stmt printStatement()
+        private GStmt.Stmt printStatement()
         {
-            Expr value = expression();
+            GExpr.Expr value = expression();
             consume(tt.SEMICOLON, "Expect ';' after value.");
-            return new Print(value);
+            return new GStmt.Print(value);
         }
         
-        private Stmt expressionStatement()
+        private GStmt.Stmt expressionStatement()
         {
-            Expr expr = expression();
+            GExpr.Expr expr = expression();
             consume(tt.SEMICOLON, "Expect ';' after value.");
-            return new Expression(expr);
+            return new GStmt.Expression(expr);
         }
 
 
-        private Expr expression()
+        private GExpr.Expr expression()
         {
-            return equality();
+            return assignment();
         }
 
-        private Expr equality()
+        private GExpr.Expr assignment()
         {
-            Expr expr = comparison();
-            while(Match(tt.BANG_EQUAL, tt.EQUAL_EQUAL))
+            GExpr.Expr expr = equality();
+
+            if (Match(tt.EQUAL))
             {
-                Token Operator = previous();
-                Expr right = comparison();
-                expr = new Binary(expr, Operator, right);
+                Token equals = previous();
+                GExpr.Expr value = assignment();
+
+                if(expr is GExpr.Variable)
+                {
+                    Token name = ((GExpr.Variable)expr).name;
+                    return new GExpr.Assign(name, value);
+                }
+
+                error(equals, "Invalid assignment target.");
             }
 
             return expr;
         }
 
-        private Expr comparison()
+        private GExpr.Expr equality()
         {
-            Expr expr = addition();
+            GExpr.Expr expr = comparison();
+            while(Match(tt.BANG_EQUAL, tt.EQUAL_EQUAL))
+            {
+                Token Operator = previous();
+                GExpr.Expr right = comparison();
+                expr = new GExpr.Binary(expr, Operator, right);
+            }
+
+            return expr;
+        }
+
+        private GExpr.Expr comparison()
+        {
+            GExpr.Expr expr = addition();
 
             while (Match(tt.GREATER, tt.GREATER_EQUAL, tt.LESS, tt.LESS_EQUAL))
             {
                 Token Operator = previous();
-                Expr right = addition();
-                expr = new Binary(expr, Operator, right);
+                GExpr.Expr right = addition();
+                expr = new GExpr.Binary(expr, Operator, right);
             }
 
             return expr;
         }
 
-        private Expr addition()
+        private GExpr.Expr addition()
         {
-            Expr expr = multiplication();
+            GExpr.Expr expr = multiplication();
 
             while(Match(tt.MINUS, tt.PLUS))
             {
                 Token Operator = previous();
-                Expr right = multiplication();
-                expr = new Binary(expr, Operator, right);
+                GExpr.Expr right = multiplication();
+                expr = new GExpr.Binary(expr, Operator, right);
             }
 
             return expr;
         }
 
-        private Expr multiplication()
+        private GExpr.Expr multiplication()
         {
-            Expr expr = unary();
+            GExpr.Expr expr = unary();
 
             while(Match(tt.SLASH, tt.STAR))
             {
                 Token Operator = previous();
-                Expr right = unary();
-                expr = new Binary(expr, Operator, right);
+                GExpr.Expr right = unary();
+                expr = new GExpr.Binary(expr, Operator, right);
             }
 
             return expr;
         }
 
-        private Expr unary()
+        private GExpr.Expr unary()
         {
             if(Match(tt.BANG, tt.MINUS))
             {
                 Token Operator = previous();
-                Expr right = unary();
-                return new Unary(Operator, right);
+                GExpr.Expr right = unary();
+                return new GExpr.Unary(Operator, right);
             }
 
             return primary();
         }
 
-        private Expr primary()
+        private GExpr.Expr primary()
         {
             if (Match(tt.FALSE))
             {
-                return new Literal(false);
+                return new GExpr.Literal(false);
             }
 
             if (Match(tt.TRUE))
             {
-                return new Literal(true);
+                return new GExpr.Literal(true);
             }
 
             if (Match(tt.NIL))
             {
-                return new Literal(null);
+                return new GExpr.Literal(null);
             }
 
             if (Match(tt.NUMBER, tt.STRING))
             {
-                return new Literal(previous().literal);
+                return new GExpr.Literal(previous().literal);
             }
 
             if (Match(tt.LEFT_PAREN))
             {
-                Expr expr = expression();
+                GExpr.Expr expr = expression();
                 consume(tt.RIGHT_PAREN, "Expect ')' after expression.");
-                return new Grouping(expr);
+                return new GExpr.Grouping(expr);
+            }
+            if (Match(tt.IDENTIFIER))
+            {
+                return new GExpr.Variable(previous());
             }
 
             throw error(peek(), "unexpected token");
