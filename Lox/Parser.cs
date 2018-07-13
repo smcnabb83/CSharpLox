@@ -12,10 +12,12 @@ namespace Lox
     {
         private List<Token> Tokens;
         private int current = 0;
+        private bool isRepl = false;
 
-        public Parser(List<Token> tokens)
+        public Parser(List<Token> tokens, bool repl = false)
         {
             this.Tokens = tokens;
+            this.isRepl = repl;
         }
 
         public List<GStmt.Stmt> parse()
@@ -197,6 +199,10 @@ namespace Lox
         {
             GExpr.Expr expr = expression();
             consume(tt.SEMICOLON, "Expect ';' after value.");
+            if (isRepl)
+            {
+                return new GStmt.Print(expr);
+            }
             return new GStmt.Expression(expr);
         }
 

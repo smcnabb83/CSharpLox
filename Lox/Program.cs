@@ -54,20 +54,22 @@ namespace Lox
             while (true)
             {
                 Console.Write("> ");
-                run(Console.ReadLine());
+                run(Console.ReadLine(), true);
             }
         }
 
-        private static void run(string source)
+        private static void run(string source, bool replOn = false)
         {
+            hasError = false;
             Scanner scanner = new Scanner(source);
             List<Token> tokens = scanner.scanTokens();
-            Parser parser = new Parser(tokens);
+            Parser parser = new Parser(tokens, replOn);
             List<GStmt.Stmt> statements = parser.parse();
 
             if (hasError) return;
-
+                        
             interpreter.interpret(statements);
+
         }
 
         public static void error(Token token, string message)
