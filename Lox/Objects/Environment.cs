@@ -40,6 +40,26 @@ namespace Lox
             throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
         }
 
+        public object getAt(int distance, string name)
+        {
+            return ancestor(distance).values[name];
+        }
+
+        public void assignAt(int distance, Token name, Object value)
+        {
+            ancestor(distance).values[name.lexeme] = value;
+        }
+
+        Environment ancestor(int distance)
+        {
+            Environment env = this;
+            for(int i = 0; i < distance; i++)
+            {
+                env = env.enclosing;
+            }
+            return env;
+        }
+
         public void assign(Token name, Object value)
         {
             if (values.ContainsKey(name.lexeme))
@@ -56,5 +76,6 @@ namespace Lox
 
             throw new RuntimeError(name, $"Undefined variable '{name.lexeme}'.");
         }
+
     }
 }

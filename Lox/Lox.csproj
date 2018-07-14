@@ -51,11 +51,13 @@
     <Compile Include="Interpreter.cs" />
     <Compile Include="Interfaces\LoxCallable.cs" />
     <Compile Include="Exceptions\ParseException.cs" />
+    <Compile Include="Objects\ExtensionMethods.cs" />
     <Compile Include="Objects\LoxFunction.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Exceptions\RuntimeError.cs" />
+    <Compile Include="Resolver.cs" />
     <Compile Include="Scanner.cs" />
     <Compile Include="AbstractSyntaxTree\Stmt.cs" />
     <Compile Include="Objects\Token.cs" />

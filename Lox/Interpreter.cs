@@ -13,6 +13,7 @@ namespace Lox
     {
         public Environment globals = new Environment();
         private Environment environment;
+        private Dictionary<GExpr.Expr, int> locals = new Dictionary<GExpr.Expr, int>();
 
         private Object evaluate(GExpr.Expr Expression)
         {
@@ -200,6 +201,19 @@ namespace Lox
             return environment.get(expr.name);
         }
 
+        private Object lookUpVariable(Token name, GExpr.Expr expression)
+        {
+            int distance = locals.ContainsKey(expression) ? locals[expression] : -1;
+            if(distance >= 0)
+            {
+                return environment.getAt(distance, name.lexeme);
+            }
+            else
+            {
+                return globals.get(name);
+            }
+        }
+
         public Object visit_Var_Stmt(GStmt.Var stmt)
         {
             Object value = null;
@@ -215,7 +229,16 @@ namespace Lox
         public Object visit_Assign_Expr(GExpr.Assign expr)
         {
             Object value = evaluate(expr.value);
-            environment.assign(expr.name, value);
+
+            int distance = locals.ContainsKey(expr) ? locals[expr] : -1;
+            if(distance < 0)
+            {
+                environment.assignAt(distance, expr.name, value);
+            } else
+            {
+                globals.assign(expr.name, value);
+            }
+
             return value;
         }
 
@@ -321,6 +344,11 @@ namespace Lox
                 value = evaluate(stmt.value);
             }
             throw new Returner(value);
+        }
+
+        public void resolve(GExpr.Expr expr, int depth)
+        {
+            locals.Add(expr, depth);
         }
     }
 }
