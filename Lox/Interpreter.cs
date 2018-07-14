@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lox;
+using Lox.BuiltInFunctions;
 using tt = Lox.Token.TokenType;
 
 namespace Lox
 {
-    class Interpreter : GExpr.Visitor<Object>, GStmt.Visitor<Object>
+    public class Interpreter : GExpr.Visitor<Object>, GStmt.Visitor<Object>
     {
-        private Environment environment = new Environment();
+        public Environment globals = new Environment();
+        private Environment environment;
 
         private Object evaluate(GExpr.Expr Expression)
         {
@@ -22,7 +24,14 @@ namespace Lox
             st.Accept(this);
         }
 
-        private void executeBlock(List<GStmt.Stmt> statements, Environment env)
+        public Interpreter()
+        {
+            environment = globals;
+
+            globals.define("clock", new Function_Clock());
+        }
+
+        public void executeBlock(List<GStmt.Stmt> statements, Environment env)
         {
             Environment previous = this.environment;
             try
@@ -270,6 +279,48 @@ namespace Lox
         public object visit_Break_Stmt(GStmt.Break stmt)
         {
             throw new BreakException(stmt.breakToken, "Invalid break");
+        }
+
+        public object visit_Call_Expr(GExpr.Call expr)
+        {
+            Object callee = evaluate(expr.callee);
+
+            List<object> arguments = new List<object>();
+
+            foreach(GExpr.Expr argument in expr.Arguments)
+            {
+                arguments.Add(evaluate(argument));
+            }
+
+            if(!(callee is LoxCallable))
+            {
+                throw new RuntimeError(expr.paren, "Can only call functions and classes");
+            }
+
+            LoxCallable function = (LoxCallable)callee;
+
+            if(arguments.Count != function.arity())
+            {
+                throw new RuntimeError(expr.paren, $"Expected {function.arity()} arguments but got {arguments.Count}.");
+            }
+            return function.call(this, arguments);
+        }
+
+        public object visit_Function_Stmt(GStmt.Function stmt)
+        {
+            LoxFunction function = new LoxFunction(stmt, environment);
+            environment.define(stmt.name.lexeme, function);
+            return null;
+        }
+
+        public object visit_Return_Stmt(GStmt.Return stmt)
+        {
+            Object value = null;
+            if(stmt.value != null)
+            {
+                value = evaluate(stmt.value);
+            }
+            throw new Returner(value);
         }
     }
 }

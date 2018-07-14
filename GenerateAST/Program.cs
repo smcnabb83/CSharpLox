@@ -22,7 +22,9 @@ namespace GenerateAST
                                                                            "Block: List<Stmt> statements",
                                                                            "If: Expr condition, Stmt thenBranch, Stmt elseBranch",
                                                                            "While: Expr condition, Stmt body",
-                                                                           "Break: Token breakToken"});
+                                                                           "Break: Token breakToken",
+                                                                           "Function: Token name, List<Token> parameters, List<Stmt> body",
+                                                                           "Return: Token keyword, Expr value"});
 
             defineAst($"{outputDir}\\Expr.cs", "Expr", new List<string>(){"Binary: Expr left, Token Operator, Expr right",
                                                                           "Grouping: Expr expression",
@@ -30,7 +32,8 @@ namespace GenerateAST
                                                                           "Unary: Token Operator, Expr right",
                                                                           "Variable: Token name",
                                                                           "Assign: Token name, Expr value",
-                                                                          "Logical: Expr left, Token Operator, Expr right"});
+                                                                          "Logical: Expr left, Token Operator, Expr right",
+                                                                          "Call: Expr callee, Token paren, List<Expr> Arguments"});
         }
 
         private static void defineAst(String outputDir, string baseName, List<string> types)

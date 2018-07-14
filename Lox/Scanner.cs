@@ -80,6 +80,21 @@ namespace Lox
                             advance();
                         }
                     }
+                    //else if (match('*'))
+                    //{
+                    //    while (!isAtEnd())
+                    //    {
+                    //        if(match('*'))
+                    //        {
+                    //            if(match('/'))
+                    //            {
+                    //                advance();
+                    //                break;
+                    //            }
+                    //        }
+                    //    }
+                    //}
+
                     else
                     {
                         addToken(Token.TokenType.SLASH);
@@ -217,6 +232,15 @@ namespace Lox
                 return '\0';
             }
             return Source[current + 1];
+        }
+
+        private char previous()
+        {
+            if(current > 0)
+            {
+                return Source[current - 1];
+            }
+            return Source[current];
         }
 
         private void addToken(Token.TokenType type)

@@ -17,6 +17,8 @@ namespace Lox.GStmt
         T visit_If_Stmt(If stmt);
         T visit_While_Stmt(While stmt);
         T visit_Break_Stmt(Break stmt);
+        T visit_Function_Stmt(Function stmt);
+        T visit_Return_Stmt(Return stmt);
     }
     public abstract class Stmt
     {
@@ -134,6 +136,42 @@ namespace Lox.GStmt
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Break_Stmt(this);
+        }
+    }
+    public class Function : Stmt
+    {
+
+        public Token name;
+        public List<Token> parameters;
+        public List<Stmt> body;
+
+        public Function(Token name, List<Token> parameters, List<Stmt> body)
+        {
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Function_Stmt(this);
+        }
+    }
+    public class Return : Stmt
+    {
+
+        public Token keyword;
+        public Expr value;
+
+        public Return(Token keyword, Expr value)
+        {
+            this.keyword = keyword;
+            this.value = value;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Return_Stmt(this);
         }
     }
 }

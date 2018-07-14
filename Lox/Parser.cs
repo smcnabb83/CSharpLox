@@ -36,6 +36,10 @@ namespace Lox
         {
             try
             {
+                if (Match(tt.FUN))
+                {
+                    return function("function");
+                }
                 if (Match(tt.VAR))
                 {
                     return varDeclaration();
@@ -46,6 +50,34 @@ namespace Lox
             {
                 synchronize();
                 return null;
+            }
+        }
+
+        private GStmt.Stmt function(String kind)
+        {
+            Token name = consume(tt.IDENTIFIER, $"Expect {kind} name");
+            consume(tt.LEFT_PAREN, $"Expect '(' after {kind} name");
+            List<Token> parameters = new List<Token>();
+            {
+                if (!check(tt.RIGHT_PAREN))
+                {
+                    do
+                    {
+                        if (parameters.Count >= 8)
+                        {
+                            error(peek(), "Cannot have more than 8 parameters");
+                        }
+
+                        parameters.Add(consume(tt.IDENTIFIER, "Expect parameter name"));
+                    } while (Match(tt.COMMA));
+
+                }
+
+                consume(tt.RIGHT_PAREN, "Expect ')' after parameters.");
+
+                consume(tt.LEFT_BRACE, "Expect '{' before " + kind + " body.");
+                List<GStmt.Stmt> body = block();
+                return new GStmt.Function(name, parameters, body);
             }
         }
 
@@ -73,6 +105,10 @@ namespace Lox
             {
                 return printStatement();
             }
+            if (Match(tt.RETURN))
+            {
+                return returnStatement();
+            }
             if (Match(tt.FOR))
             {
                 return forStatement();
@@ -91,6 +127,20 @@ namespace Lox
             }
 
             return expressionStatement();
+        }
+
+        private GStmt.Stmt returnStatement()
+        {
+            Token keyword = previous();
+            GExpr.Expr value = null;
+
+            if (!check(tt.SEMICOLON))
+            {
+                value = expression();
+            }
+
+            consume(tt.SEMICOLON, "Expect ';' after return value");
+            return new GStmt.Return(keyword, value);
         }
 
         private GStmt.Stmt breakStatement()
@@ -325,7 +375,45 @@ namespace Lox
                 return new GExpr.Unary(Operator, right);
             }
 
-            return primary();
+            return call();
+        }
+
+        private GExpr.Expr call()
+        {
+            GExpr.Expr expr = primary();
+
+            while (true)
+            {
+                if (Match(tt.LEFT_PAREN))
+                {
+                    expr = finishCall(expr);
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return expr;
+        }
+
+        private GExpr.Expr finishCall(GExpr.Expr callee)
+        {
+            List<GExpr.Expr> arguments = new List<GExpr.Expr>();
+            if (!check(tt.RIGHT_PAREN))
+            {
+                do
+                {
+                    if(arguments.Count >= 8)
+                    {
+                        error(peek(), "Cannot have more than 8 arguments");
+                    }
+                    arguments.Add(expression());
+                } while (Match(tt.COMMA));
+            }
+
+            Token paren = consume(tt.RIGHT_PAREN, "Expect ')' after arguments");
+            return new GExpr.Call(callee, paren, arguments);
         }
 
         private GExpr.Expr primary()

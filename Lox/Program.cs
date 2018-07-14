@@ -40,13 +40,12 @@ namespace Lox
             run(reader.ReadToEnd());
             if(hasError)
             {
-                //add code for exiting application later
+                System.Environment.Exit(65);
             }
             if (hadRuntimeError)
             {
-                //add separate code for exiting application later
+                System.Environment.Exit(67);
             }
-            Console.ReadKey();
         }
 
         private static void runPrompt()

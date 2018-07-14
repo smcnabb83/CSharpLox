@@ -15,6 +15,7 @@ namespace Lox.GExpr
         T visit_Variable_Expr(Variable expr);
         T visit_Assign_Expr(Assign expr);
         T visit_Logical_Expr(Logical expr);
+        T visit_Call_Expr(Call expr);
     }
     public abstract class Expr
     {
@@ -136,6 +137,25 @@ namespace Lox.GExpr
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Logical_Expr(this);
+        }
+    }
+    public class Call : Expr
+    {
+
+        public Expr callee;
+        public Token paren;
+        public List<Expr> Arguments;
+
+        public Call(Expr callee, Token paren, List<Expr> Arguments)
+        {
+            this.callee = callee;
+            this.paren = paren;
+            this.Arguments = Arguments;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Call_Expr(this);
         }
     }
 }
