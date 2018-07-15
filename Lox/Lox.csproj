@@ -52,7 +52,9 @@
     <Compile Include="Interfaces\LoxCallable.cs" />
     <Compile Include="Exceptions\ParseException.cs" />
     <Compile Include="Objects\ExtensionMethods.cs" />
+    <Compile Include="Objects\LoxClass.cs" />
     <Compile Include="Objects\LoxFunction.cs" />
+    <Compile Include="Objects\LoxInstance.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

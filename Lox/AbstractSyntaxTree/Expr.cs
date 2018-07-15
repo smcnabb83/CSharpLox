@@ -16,6 +16,9 @@ namespace Lox.GExpr
         T visit_Assign_Expr(Assign expr);
         T visit_Logical_Expr(Logical expr);
         T visit_Call_Expr(Call expr);
+        T visit_Get_Expr(Get expr);
+        T visit_Set_Expr(Set expr);
+        T visit_This_Expr(This expr);
     }
     public abstract class Expr
     {
@@ -156,6 +159,57 @@ namespace Lox.GExpr
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Call_Expr(this);
+        }
+    }
+    public class Get : Expr
+    {
+
+        public Expr Object;
+        public Token name;
+
+        public Get(Expr Object, Token name)
+        {
+            this.Object = Object;
+            this.name = name;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Get_Expr(this);
+        }
+    }
+    public class Set : Expr
+    {
+
+        public Expr Object;
+        public Token name;
+        public Expr value;
+
+        public Set(Expr Object, Token name, Expr value)
+        {
+            this.Object = Object;
+            this.name = name;
+            this.value = value;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Set_Expr(this);
+        }
+    }
+    public class This : Expr
+    {
+
+        public Token keyword;
+
+        public This(Token keyword)
+        {
+            this.keyword = keyword;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_This_Expr(this);
         }
     }
 }

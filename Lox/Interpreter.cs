@@ -198,7 +198,7 @@ namespace Lox
 
         public Object visit_Variable_Expr(GExpr.Variable expr)
         {
-            return environment.get(expr.name);
+            return lookUpVariable(expr.name, expr);
         }
 
         private Object lookUpVariable(Token name, GExpr.Expr expression)
@@ -231,7 +231,7 @@ namespace Lox
             Object value = evaluate(expr.value);
 
             int distance = locals.ContainsKey(expr) ? locals[expr] : -1;
-            if(distance < 0)
+            if(distance >= 0)
             {
                 environment.assignAt(distance, expr.name, value);
             } else
@@ -331,7 +331,7 @@ namespace Lox
 
         public object visit_Function_Stmt(GStmt.Function stmt)
         {
-            LoxFunction function = new LoxFunction(stmt, environment);
+            LoxFunction function = new LoxFunction(stmt, environment, false);
             environment.define(stmt.name.lexeme, function);
             return null;
         }
@@ -349,6 +349,52 @@ namespace Lox
         public void resolve(GExpr.Expr expr, int depth)
         {
             locals.Add(expr, depth);
+        }
+
+        public object visit_Class_Stmt(GStmt.Class stmt)
+        {
+            environment.define(stmt.name.lexeme, null);
+
+            Dictionary<string, LoxFunction> methods = new Dictionary<string, LoxFunction>();
+            foreach(GStmt.Function method in stmt.methods)
+            {
+                LoxFunction function = new LoxFunction(method, environment, method.name.lexeme == "init");
+                methods.Add(method.name.lexeme, function);
+            }
+
+            LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+            environment.assign(stmt.name, klass);
+            return null;
+        }
+
+        public object visit_Get_Expr(GExpr.Get expr)
+        {
+            object obj = evaluate(expr.Object);
+            if(obj is LoxInstance)
+            {
+                return ((LoxInstance)obj).get(expr.name);
+            }
+
+            throw new RuntimeError(expr.name, "Only instances have properties");
+        }
+
+        public object visit_Set_Expr(GExpr.Set expr)
+        {
+            object obj = evaluate(expr.Object);
+
+            if(!(obj is LoxInstance))
+            {
+                throw new RuntimeError(expr.name, "Only instances have fields");
+            }
+            Object value = evaluate(expr.value);
+            ((LoxInstance)obj).set(expr.name, value);
+
+            return null;
+        }
+
+        public object visit_This_Expr(GExpr.This expr)
+        {
+            return lookUpVariable(expr.keyword, expr);
         }
     }
 }

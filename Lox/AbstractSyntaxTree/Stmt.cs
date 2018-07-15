@@ -19,6 +19,7 @@ namespace Lox.GStmt
         T visit_Break_Stmt(Break stmt);
         T visit_Function_Stmt(Function stmt);
         T visit_Return_Stmt(Return stmt);
+        T visit_Class_Stmt(Class stmt);
     }
     public abstract class Stmt
     {
@@ -172,6 +173,23 @@ namespace Lox.GStmt
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_Return_Stmt(this);
+        }
+    }
+    public class Class : Stmt
+    {
+
+        public Token name;
+        public List<Function> methods;
+
+        public Class(Token name, List<Function> methods)
+        {
+            this.name = name;
+            this.methods = methods;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Class_Stmt(this);
         }
     }
 }

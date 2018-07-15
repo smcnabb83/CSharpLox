@@ -13,11 +13,21 @@ namespace Lox
         private Interpreter interpreter;
         private Stack<Dictionary<string, bool>> scopes = new Stack<Dictionary<string, bool>>();
         private FunctionType currentFunction = FunctionType.NONE;
+        private ClassType currentClass = ClassType.NONE;
+        private bool inLoop = false;
 
         private enum FunctionType
         {
             NONE,
-            FUNCTION
+            FUNCTION,
+            METHOD,
+            INITIALIZER
+        }
+
+        private enum ClassType
+        {
+            NONE,
+            CLASS
         }
 
         public Resolver(Interpreter intr)
@@ -49,6 +59,10 @@ namespace Lox
 
         public object visit_Break_Stmt(Break stmt)
         {
+            if (!inLoop)
+            {
+                Program.error(stmt.breakToken, "Cannot use break outside of a loop");
+            }
             return null;
         }
 
@@ -123,6 +137,10 @@ namespace Lox
 
             if(stmt.value != null)
             {
+                if(currentFunction == FunctionType.INITIALIZER)
+                {
+                    Program.error(stmt.keyword, "Cannot return a value from an initializer");
+                }
                 resolve(stmt.value);
             }
             return null;
@@ -158,8 +176,11 @@ namespace Lox
 
         public object visit_While_Stmt(While stmt)
         {
+            bool currentLoop = inLoop;
+            inLoop = true;
             resolve(stmt.condition);
             resolve(stmt.body);
+            inLoop = currentLoop;
             return null;
         }
 
@@ -173,10 +194,8 @@ namespace Lox
             if (scopes.isEmpty())
             {
                 return;
-            }
-
-            Dictionary<string, bool> scope = scopes.Peek();
-            scope.Add(name.lexeme, false);
+            }            
+            scopes.Peek().Add(name.lexeme, false);
         }
 
         private void define(Token name)
@@ -236,10 +255,60 @@ namespace Lox
             {
                 if (scopes.ElementAt(i).ContainsKey(name.lexeme))
                 {
-                    interpreter.resolve(expr, scopes.Count - 1 - i);
+                    interpreter.resolve(expr,i);
                     return;
                 }
             }
+        }
+
+        public object visit_Class_Stmt(GStmt.Class stmt)
+        {
+            ClassType enclosingClass = currentClass;
+            currentClass = ClassType.CLASS;
+
+            declare(stmt.name);
+            define(stmt.name);
+            beginScope();
+            scopes.Peek().Add("this", true);
+
+            foreach (GStmt.Function method in stmt.methods)
+            {
+                FunctionType declaration = FunctionType.METHOD;
+                if(method.name.lexeme == "init")
+                {
+                    declaration = FunctionType.INITIALIZER;
+                }
+                resolveFunction(method, declaration);
+            }
+
+            endScope();
+
+            currentClass = enclosingClass;
+
+            return null;
+        }
+
+        public object visit_Get_Expr(GExpr.Get expr)
+        {
+            resolve(expr.Object);
+            return null;
+        }
+
+        public object visit_Set_Expr(GExpr.Set expr)
+        {
+            resolve(expr.value);
+            resolve(expr.Object);
+            return null;
+        }
+
+        public object visit_This_Expr(GExpr.This expr)
+        {
+            if(currentClass == ClassType.NONE)
+            {
+                Program.error(expr.keyword, "Cannot use 'this' outside of a class.");
+            }
+            resolveLocal(expr, expr.keyword);
+            return null;
         }
     }
 }

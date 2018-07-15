@@ -15,7 +15,7 @@ namespace Lox.BuiltInFunctions
 
         public object call(Interpreter interpreter, List<object> arguments)
         {
-            return (double)System.DateTime.Now.Millisecond / (double)1000;
+            return (double)System.DateTime.Now.Millisecond / (double)1000 + (double)System.DateTime.Now.Second;
         }
 
         public override string ToString()

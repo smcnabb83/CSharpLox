@@ -36,6 +36,10 @@ namespace Lox
         {
             try
             {
+                if (Match(tt.CLASS))
+                {
+                    return classDeclaration();
+                }
                 if (Match(tt.FUN))
                 {
                     return function("function");
@@ -51,6 +55,22 @@ namespace Lox
                 synchronize();
                 return null;
             }
+        }
+
+        private GStmt.Stmt classDeclaration()
+        {
+            Token name = consume(tt.IDENTIFIER, "Expect class name");
+            consume(tt.LEFT_BRACE, "Expect '{' before class body");
+
+            List<GStmt.Function> methods = new List<GStmt.Function>();
+            while(!check(tt.RIGHT_BRACE) && !isAtEnd())
+            {
+                methods.Add(function("method") as GStmt.Function);
+            }
+
+            consume(tt.RIGHT_BRACE, "Expect '}' after class body.");
+
+            return new GStmt.Class(name, methods);
         }
 
         private GStmt.Stmt function(String kind)
@@ -275,6 +295,10 @@ namespace Lox
                 {
                     Token name = ((GExpr.Variable)expr).name;
                     return new GExpr.Assign(name, value);
+                } else if (expr is GExpr.Get)
+                {
+                    GExpr.Get get = (GExpr.Get)expr;
+                    return new GExpr.Set(get.Object, get.name, value);
                 }
 
                 error(equals, "Invalid assignment target.");
@@ -388,6 +412,11 @@ namespace Lox
                 {
                     expr = finishCall(expr);
                 }
+                else if (Match(tt.DOT))
+                {
+                    Token name = consume(tt.IDENTIFIER, "Expect property name after '.'.");
+                    expr = new GExpr.Get(expr, name);
+                }
                 else
                 {
                     break;
@@ -443,6 +472,11 @@ namespace Lox
                 GExpr.Expr expr = expression();
                 consume(tt.RIGHT_PAREN, "Expect ')' after expression.");
                 return new GExpr.Grouping(expr);
+            }
+
+            if (Match(tt.THIS))
+            {
+                return new GExpr.This(previous());
             }
             if (Match(tt.IDENTIFIER))
             {

@@ -10,10 +10,12 @@ namespace Lox
     {
         private GStmt.Function declaration;
         private Environment closure;
-        public LoxFunction(GStmt.Function dec, Environment closure)
+        private bool isInitializer;
+        public LoxFunction(GStmt.Function dec, Environment closure, bool isInitializer)
         {
             this.closure = closure;
             this.declaration = dec;
+            this.isInitializer = isInitializer;
         }
 
         public object call(Interpreter interpreter, List<Object> arguments)
@@ -30,9 +32,25 @@ namespace Lox
             }
             catch (Returner retValue)
             {
+                if (isInitializer)
+                {
+                    return closure.getAt(0, "this");
+                }
                 return retValue.value;
             }
+
+            if (isInitializer)
+            {
+                return closure.getAt(0, "this");
+            }
             return null;
+        }
+
+        public LoxFunction bind(LoxInstance instance)
+        {
+            Environment env = new Environment(closure);
+            env.define("this", instance);
+            return new LoxFunction(declaration, env, isInitializer);
         }
 
         public int arity()
