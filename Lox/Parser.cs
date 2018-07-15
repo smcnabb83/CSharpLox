@@ -153,8 +153,20 @@ namespace Lox
             {
                 return breakStatement();
             }
+            if (Match(tt.TRY))
+            {
+                return tryStatement();
+            }
 
             return expressionStatement();
+        }
+
+        private GStmt.Stmt tryStatement()
+        {
+            GStmt.Stmt tryBlock = statement();
+            consume(tt.CATCH, "Expect catch block after try");
+            GStmt.Stmt catchBlock = statement();
+            return new GStmt.Try(tryBlock, catchBlock);
         }
 
         private GStmt.Stmt returnStatement()

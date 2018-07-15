@@ -341,5 +341,12 @@ namespace Lox
             resolveLocal(expr, expr.keyword);
             return null;
         }
+
+        public object visit_Try_Stmt(GStmt.Try stmt)
+        {
+            resolve(stmt.tryStmt);
+            resolve(stmt.catchStmt);
+            return null;
+        }
     }
 }

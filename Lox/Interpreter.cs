@@ -438,5 +438,18 @@ namespace Lox
 
             return method;
         }
+
+        public object visit_Try_Stmt(GStmt.Try stmt)
+        {
+            try
+            {
+                execute(stmt.tryStmt);
+            }
+            catch(RuntimeError ex)
+            {
+                execute(stmt.catchStmt);
+            }
+            return null;
+        }
     }
 }
