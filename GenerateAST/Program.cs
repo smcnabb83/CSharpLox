@@ -25,7 +25,7 @@ namespace GenerateAST
                                                                            "Break: Token breakToken",
                                                                            "Function: Token name, List<Token> parameters, List<Stmt> body",
                                                                            "Return: Token keyword, Expr value",
-                                                                           "Class: Token name, List<Function> methods"});
+                                                                           "Class: Token name, Variable superclass, List<Function> methods"});
 
             defineAst($"{outputDir}\\Expr.cs", "Expr", new List<string>(){"Binary: Expr left, Token Operator, Expr right",
                                                                           "Grouping: Expr expression",
@@ -37,7 +37,8 @@ namespace GenerateAST
                                                                           "Call: Expr callee, Token paren, List<Expr> Arguments",
                                                                           "Get: Expr Object, Token name",
                                                                           "Set: Expr Object, Token name, Expr value",
-                                                                          "This: Token keyword"});
+                                                                          "This: Token keyword",
+                                                                          "Super: Token keyword, Token method"});
         }
 
         private static void defineAst(String outputDir, string baseName, List<string> types)

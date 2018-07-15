@@ -10,11 +10,13 @@ namespace Lox
     {
         public string name;
         private Dictionary<string, LoxFunction> methods;
+        LoxClass superclass;
 
-        public LoxClass(string n, Dictionary<string, LoxFunction> methods)
+        public LoxClass(string n, LoxClass superclass, Dictionary<string, LoxFunction> methods)
         {
             this.name = n;
             this.methods = methods;
+            this.superclass = superclass;
         }
 
         public int arity()
@@ -32,6 +34,11 @@ namespace Lox
             if (methods.ContainsKey(name))
             {
                 return methods[name].bind(instance);
+            }
+
+            if(superclass != null)
+            {
+                return superclass.findMethod(instance, name);
             }
 
             return null;

@@ -30,6 +30,8 @@ namespace Lox
             environment = globals;
 
             globals.define("clock", new Function_Clock());
+            globals.define("getInput", new Function_ReadLine());
+            globals.define("isNumeric", new Function_isNumeric());
         }
 
         public void executeBlock(List<GStmt.Stmt> statements, Environment env)
@@ -353,7 +355,23 @@ namespace Lox
 
         public object visit_Class_Stmt(GStmt.Class stmt)
         {
+            Object superclass = null;
+            if(stmt.superclass != null)
+            {
+                superclass = evaluate(stmt.superclass);
+                if(!(superclass is LoxClass))
+                {
+                    throw new RuntimeError(stmt.superclass.name, "Superclass must be a class");
+                }
+            }
+
             environment.define(stmt.name.lexeme, null);
+
+            if(stmt.superclass != null)
+            {
+                environment = new Environment(environment);
+                environment.define("super", superclass);
+            }
 
             Dictionary<string, LoxFunction> methods = new Dictionary<string, LoxFunction>();
             foreach(GStmt.Function method in stmt.methods)
@@ -362,7 +380,13 @@ namespace Lox
                 methods.Add(method.name.lexeme, function);
             }
 
-            LoxClass klass = new LoxClass(stmt.name.lexeme, methods);
+            LoxClass klass = new LoxClass(stmt.name.lexeme, (LoxClass)superclass, methods);
+
+            if(superclass != null)
+            {
+                environment = environment.enclosing;
+            }
+
             environment.assign(stmt.name, klass);
             return null;
         }
@@ -395,6 +419,24 @@ namespace Lox
         public object visit_This_Expr(GExpr.This expr)
         {
             return lookUpVariable(expr.keyword, expr);
+        }
+
+        public object visit_Super_Expr(GExpr.Super expr)
+        {
+            int distance = locals[expr];
+            LoxClass superClass = (LoxClass)environment.getAt(distance, "super");
+            // "this" is always 1 level nearer than "super's" environment
+
+            LoxInstance obj = (LoxInstance)environment.getAt(distance - 1, "this");
+
+            LoxFunction method = superClass.findMethod(obj, expr.method.lexeme);
+
+            if(method == null)
+            {
+                throw new RuntimeError(expr.method, $"Undefined property '{expr.method.lexeme}'");
+            }
+
+            return method;
         }
     }
 }

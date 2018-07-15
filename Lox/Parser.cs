@@ -60,6 +60,14 @@ namespace Lox
         private GStmt.Stmt classDeclaration()
         {
             Token name = consume(tt.IDENTIFIER, "Expect class name");
+
+            GExpr.Variable superclass = null;
+            if (Match(tt.LESS))
+            {
+                consume(tt.IDENTIFIER, "Expect superclass name");
+                superclass = new GExpr.Variable(previous());
+            }
+
             consume(tt.LEFT_BRACE, "Expect '{' before class body");
 
             List<GStmt.Function> methods = new List<GStmt.Function>();
@@ -70,7 +78,7 @@ namespace Lox
 
             consume(tt.RIGHT_BRACE, "Expect '}' after class body.");
 
-            return new GStmt.Class(name, methods);
+            return new GStmt.Class(name, superclass, methods);
         }
 
         private GStmt.Stmt function(String kind)
@@ -460,6 +468,14 @@ namespace Lox
             if (Match(tt.NIL))
             {
                 return new GExpr.Literal(null);
+            }
+
+            if (Match(tt.SUPER))
+            {
+                Token keyword = previous();
+                consume(tt.DOT, "Expect '.' after 'super'");
+                Token method = consume(tt.IDENTIFIER, "Expect superclass method name");
+                return new GExpr.Super(keyword, method);
             }
 
             if (Match(tt.NUMBER, tt.STRING))

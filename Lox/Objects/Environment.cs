@@ -9,7 +9,7 @@ namespace Lox
     public class Environment
     {
         private Dictionary<string, object> values = new Dictionary<string, object>();
-        Environment enclosing;
+        public Environment enclosing;
 
         public Environment()
         {

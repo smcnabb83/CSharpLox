@@ -19,6 +19,7 @@ namespace Lox.GExpr
         T visit_Get_Expr(Get expr);
         T visit_Set_Expr(Set expr);
         T visit_This_Expr(This expr);
+        T visit_Super_Expr(Super expr);
     }
     public abstract class Expr
     {
@@ -210,6 +211,23 @@ namespace Lox.GExpr
         override public T Accept<T>(Visitor<T> visitor)
         {
             return visitor.visit_This_Expr(this);
+        }
+    }
+    public class Super : Expr
+    {
+
+        public Token keyword;
+        public Token method;
+
+        public Super(Token keyword, Token method)
+        {
+            this.keyword = keyword;
+            this.method = method;
+        }
+
+        override public T Accept<T>(Visitor<T> visitor)
+        {
+            return visitor.visit_Super_Expr(this);
         }
     }
 }

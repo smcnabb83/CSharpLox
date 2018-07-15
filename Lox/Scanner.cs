@@ -32,7 +32,9 @@ namespace Lox
             {"true", Token.TokenType.TRUE },
             {"var", Token.TokenType.VAR },
             {"while", Token.TokenType.WHILE },
-            {"break", Token.TokenType.BREAK }
+            {"break", Token.TokenType.BREAK },
+            {"try", Token.TokenType.TRY },
+            {"catch", Token.TokenType.CATCH }
         };
 
         public Scanner(string source)

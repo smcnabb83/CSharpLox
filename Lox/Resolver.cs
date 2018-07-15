@@ -27,7 +27,8 @@ namespace Lox
         private enum ClassType
         {
             NONE,
-            CLASS
+            CLASS,
+            SUBCLASS
         }
 
         public Resolver(Interpreter intr)
@@ -267,7 +268,19 @@ namespace Lox
             currentClass = ClassType.CLASS;
 
             declare(stmt.name);
+
+            if(stmt.superclass != null)
+            {
+                currentClass = ClassType.SUBCLASS;
+                resolve(stmt.superclass);
+            }
             define(stmt.name);
+
+            if(stmt.superclass != null)
+            {
+                beginScope();
+                scopes.Peek().Add("super", true);
+            }
             beginScope();
             scopes.Peek().Add("this", true);
 
@@ -282,6 +295,11 @@ namespace Lox
             }
 
             endScope();
+
+            if(stmt.superclass != null)
+            {
+                endScope();
+            }
 
             currentClass = enclosingClass;
 
@@ -306,6 +324,19 @@ namespace Lox
             if(currentClass == ClassType.NONE)
             {
                 Program.error(expr.keyword, "Cannot use 'this' outside of a class.");
+            }
+            resolveLocal(expr, expr.keyword);
+            return null;
+        }
+
+        public object visit_Super_Expr(GExpr.Super expr)
+        {
+            if(currentClass == ClassType.NONE)
+            {
+                Program.error(expr.keyword, "Cannot use 'super' outside of a class");
+            } else if (currentClass != ClassType.SUBCLASS)
+            {
+                Program.error(expr.keyword, "Cannot use 'super' in a class with no superclass");
             }
             resolveLocal(expr, expr.keyword);
             return null;
