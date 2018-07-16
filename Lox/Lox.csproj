@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AstPrinter.cs" />
+    <Compile Include="BuiltInFunctions\Function_ClearScreen.cs" />
     <Compile Include="BuiltInFunctions\Function_isNumeric.cs" />
     <Compile Include="BuiltInFunctions\Function_ReadLine.cs" />
+    <Compile Include="BuiltInFunctions\Function_PrintColor.cs" />
     <Compile Include="Exceptions\BreakException.cs" />
     <Compile Include="BuiltInFunctions\Function_Clock.cs" />
     <Compile Include="Objects\Environment.cs" />

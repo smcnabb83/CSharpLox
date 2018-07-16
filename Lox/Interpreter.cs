@@ -32,6 +32,8 @@ namespace Lox
             globals.define("clock", new Function_Clock());
             globals.define("getInput", new Function_ReadLine());
             globals.define("isNumeric", new Function_isNumeric());
+            globals.define("clearScreen", new Function_ClearScreen());
+            globals.define("printColor", new Function_PrintColor());
         }
 
         public void executeBlock(List<GStmt.Stmt> statements, Environment env)
