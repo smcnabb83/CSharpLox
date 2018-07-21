@@ -73,6 +73,10 @@ static void skipWhitespace() {
 		case '\t':
 			advance();
 			break;
+		case '\n':
+			scanner.line++;
+			advance();
+			break;
 		case '/':
 		{
 			if (peekNext() == '/') {

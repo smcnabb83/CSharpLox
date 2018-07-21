@@ -36,5 +36,9 @@ typedef struct {
 
 void initScanner(const char* source);
 Token scanToken();
+static TokenType identifierType();
+static bool isAlpha(char c);
+static bool isDigit(char c);
+
 
 #endif // !LOXVM_SCANNER_H
